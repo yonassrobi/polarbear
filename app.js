@@ -19,29 +19,52 @@ app.set('view engine', 'ejs');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+	extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
+var Client = require('node-rest-client').Client;
+var client = new Client();
+
+//Get conditions
+app.get('/get_condition_list', function(req, res, next) {
+
+	//res.send('here');
+	var args = {
+		headers: {
+			'content-type': 'application/json',
+			'x-api-key': '8f35b9c2ab0a1b2505b64f8fe7c303b3c03d1dc6aecc0b6'
+		}
+	};
+
+	client.get("https://api.newrelic.com/v2/alerts_conditions.json?policy_id=160661", args, function(data, response) {
+		res.json(data);
+	});
+
+
+});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+	var err = new Error('Not Found');
+	err.status = 404;
+	next(err);
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+	// set locals, only providing error in development
+	res.locals.message = err.message;
+	res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+	// render the error page
+	res.status(err.status || 500);
+	res.render('error');
 });
 
 module.exports = app;
